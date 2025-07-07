@@ -31,3 +31,5 @@ google-services.json
 
 # Android Profiling
 *.hprof
+chatapp/app/src/main/assets/targetFile.json
+rustserverprj/target/

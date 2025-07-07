@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">chat-app</string>
+    <string name="splash_screen">hehehe</string>
+    <string name="button_text">Touch me</string>
+</resources>
