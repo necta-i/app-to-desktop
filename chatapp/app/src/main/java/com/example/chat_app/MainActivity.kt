@@ -16,13 +16,12 @@ import org.json.JSONObject
 import java.io.PrintWriter
 import java.net.Socket
 
-private var count = 0
+//private var count = 0
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         val btn: Button = findViewById(R.id.touchBtn)
-        val txt: TextView = findViewById(R.id.textView)
 
         fun readJson(context: Context, fileName: String): String{
             return context.assets.open(fileName).bufferedReader().use{
@@ -35,22 +34,21 @@ class MainActivity : AppCompatActivity() {
         val ipAddress = jsonObj.getString("address")
         val port = jsonObj.getInt("port")
         btn.setOnClickListener {
-            count++
-            txt.text = "You touched me $count times"
+            //tests to check if i still know how to write android code after finishing uni
+            //server testing
+            //count++
+            //txt.text = "You touched me $count times"
             CoroutineScope(Dispatchers.IO).launch{
                 try{
                     val socket = Socket(ipAddress, port)
                     val pw = PrintWriter(socket.getOutputStream(), true)
-                    pw.println(txt.text)
                     pw.println()
                     val br = socket.getInputStream().bufferedReader().readLine()
                     withContext(Dispatchers.Main){
-                        txt.text = br
                     }
                     socket.close()
                 } catch(e: Exception){
                     withContext(Dispatchers.Main){
-                        txt.text = "Woopsie, the server did a fucky wucky ${e.message}"
                     }
                 }
             }

@@ -5,8 +5,8 @@ plugins {
 
 android {
     namespace = "com.example.chat_app"
-    compileSdk = 36
-
+    compileSdkVersion(rootProject.extra["compileSdkVersion"] as Int)
+    compileSdk = 34
     defaultConfig {
         applicationId = "com.example.chat_app"
         minSdk = 24
