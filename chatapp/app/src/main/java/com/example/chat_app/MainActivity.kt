@@ -2,7 +2,9 @@ package com.example.chat_app
 
 import android.content.Context
 import android.os.Bundle
+import android.widget.ArrayAdapter
 import android.widget.Button
+import android.widget.ListView
 import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -43,8 +45,26 @@ class MainActivity : AppCompatActivity() {
                     val socket = Socket(ipAddress, port)
                     val pw = PrintWriter(socket.getOutputStream(), true)
                     pw.println()
+                    //read server response
                     val br = socket.getInputStream().bufferedReader().readLine()
+                    val responseJson = JSONObject(br)
+                    val directories = responseJson.getJSONArray("directories")
+                    val contents = responseJson.getJSONArray("last_dir_contents")
+                    //save data from the server message (json) to a list
+                    val listItems = mutableListOf<String>()
+                    listItems.add("Directories:")
+                    for (i in 0 until directories.length()) {
+                        listItems.add(directories.getString(i))
+                    }
+                    listItems.add("Last Directory Contents:")
+                    for (i in 0 until contents.length()) {
+                        listItems.add(contents.getString(i))
+                    }
                     withContext(Dispatchers.Main){
+                        //display list in listview
+                        val listView: ListView = findViewById(R.id.lvDir)
+                        val adapter = ArrayAdapter(this@MainActivity, android.R.layout.simple_list_item_1, listItems)
+                        listView.adapter = adapter
                     }
                     socket.close()
                 } catch(e: Exception){

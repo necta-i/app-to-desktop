@@ -1,5 +1,10 @@
+use serde_json::json;
 use std::{
-    env, io::{prelude::*, BufReader}, net::{SocketAddr, TcpListener, TcpStream, UdpSocket}, path::PathBuf
+    env, 
+    io::{prelude::*, BufReader}, 
+    net::{SocketAddr, TcpListener, TcpStream, UdpSocket}, 
+    path::PathBuf,
+    fs
 };
 fn main() {
     //get current directory for the server
@@ -22,14 +27,29 @@ fn main() {
 }
 
 fn read_stream(mut stream: TcpStream, current_directory: PathBuf){
-    //read stream from client
-    let b_reader = BufReader::new(&stream);
-    //break stream into lines
-    let msg: Vec<_> = b_reader.lines().map(|result|result.unwrap())
-    .take_while(|line|!line.is_empty()).collect();
-    //print message to console
-    println!("Message: {msg:#?}");
-    //respond
-    let response = format!("Cool, thanks. Also, here's my current directory{}", current_directory.display());
-    stream.write_all(response.as_bytes()).unwrap();
+    let mut entire_path = Some(current_directory.as_path());
+    let mut directories: Vec<String> = Vec::new();
+
+    //make an array containing each directory 
+    while let Some(dir) = entire_path{
+       if let Some(name) = dir.file_name().and_then(|n| n.to_str()) {
+            directories.push(name.to_string());
+        } else {
+            directories.push("C".to_string()); // fallback for root or unknown
+        }
+        entire_path = dir.parent();
+    }
+
+    let last_path = PathBuf::from(&directories[0]); 
+    //get the contents of the server's directory
+    let contents = fs::read_dir(&last_path)
+        .unwrap_or_else(|_| fs::read_dir(".").unwrap())
+        .filter_map(|entry| entry.ok().map(|e| e.file_name().to_string_lossy().to_string()))
+        .collect::<Vec<_>>();
+    //formulate a json response for the app to read
+    let response_json = json!({
+        "directories": directories,
+        "last_dir_contents": contents
+    }).to_string() + "\n";
+    stream.write_all(response_json.as_bytes()).unwrap();
 }
